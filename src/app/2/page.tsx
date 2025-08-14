@@ -14,12 +14,12 @@ function VerificationPage() {
   const [error, setError] = useState('');
   const [registered, setRegistere] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState(false);
-  const adharID = localStorage.getItem('adharID')
   const [refNum, setRefNum] =  useState<String>('')
   const [adharNum, setAdharNum] =  useState<String>('')
   const [fullName, setFullName] =  useState<String>('')
 
     useEffect(() => {
+    const adharID = localStorage.getItem('adharID')
     if(!adharID){
         navigate.push('/')
     }
