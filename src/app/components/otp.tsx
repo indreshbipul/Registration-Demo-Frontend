@@ -3,7 +3,7 @@ import React, { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import services from '../services/services'
 
-function Otp({backotp, adharID} ) {
+function Otp({backotp, adharID} : {backotp : String, adharID : String}) {
   const nevigate = useRouter()
   const [otp, setOtp] = useState<{ [key: number]: string }>({})
   const inputRefs = useRef<Array<HTMLInputElement | null>>([])

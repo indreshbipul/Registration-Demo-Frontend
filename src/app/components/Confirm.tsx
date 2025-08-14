@@ -2,7 +2,13 @@
 import React from 'react'
 import { useRouter } from 'next/navigation'
 
-function Confirm({fullName, pan , adharID, pincode, refNum}) {
+function Confirm({fullName, pan , adharID, pincode, refNum} : {
+  fullName: String;
+  pan: String;
+  adharID: String;
+  pincode: String;
+  refNum: String;
+}) {
     const navigate = useRouter()
   return (
     <div className=" flex items-center justify-center ">
