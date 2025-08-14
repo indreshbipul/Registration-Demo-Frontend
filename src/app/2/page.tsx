@@ -12,68 +12,81 @@ function VerificationPage() {
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
   const [error, setError] = useState('');
-  const [registered, setRegistere] = useState<boolean>(false)
+  const [registered, setRegistered] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [refNum, setRefNum] =  useState<String>('')
-  const [adharNum, setAdharNum] =  useState<String>('')
-  const [fullName, setFullName] =  useState<String>('')
+  const [refNum, setRefNum] = useState<string>('');
+  const [adharNum, setAdharNum] = useState<string>('');
+  const [fullName, setFullName] = useState<string>('');
 
-    useEffect(() => {
-    const adharID = localStorage.getItem('adharID')
-    if(!adharID){
-        navigate.push('/')
+  // Only run on client side
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedAdhar = localStorage.getItem('adharID');
+      if (!storedAdhar) {
+        navigate.push('/');
+        return;
+      }
+      setAdharNum(storedAdhar);
     }
+  }, [navigate]);
+
+  useEffect(() => {
     if (pincode.length !== 6) {
       setCity('');
       setState('');
       return;
     }
-    const fetchPincodeDetails = () => {
-      setIsLoading(true); 
-      setError(''); 
-      services.getPincode(pincode)
-        .then((data)=>{
-            if (data && data[0].Status === 'Success') {
-                setIsLoading(false)
-                const postOffice = data[0].PostOffice[0];
-                setCity(postOffice.District);
-                setState(postOffice.State);
-            } else {
-                setError('Invalid Pincode. Please check and try again.');
-                setCity('');
-                setState('');
-            }
-        })
-        .catch((err)=>{
-            setError(err)
-        })
-    }
+
+    const fetchPincodeDetails = async () => {
+      try {
+        setIsLoading(true);
+        setError('');
+        const data = await services.getPincode(pincode);
+        if (data && data[0].Status === 'Success') {
+          const postOffice = data[0].PostOffice[0];
+          setCity(postOffice.District);
+          setState(postOffice.State);
+        } else {
+          setError('Invalid Pincode. Please check and try again.');
+          setCity('');
+          setState('');
+        }
+      } catch (err: any) {
+        setError('Error fetching pincode details.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
     fetchPincodeDetails();
   }, [pincode]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!panNumber || pincode.length !== 6 || !city || !state) {
       setError('Please fill in all required fields.');
       return;
-    }    
+    }
+
     setError('');
-    const data = { pan:panNumber, adharID};
-    services.panVerification(data)
-      .then(({ res, status }) => {
-        if (status === 200) {
-            setFullName(res.fullName)
-            setRefNum(res.id)
-            setAdharNum(res.adharID)
-            setRegistere(true)
-            localStorage.removeItem('adharID')
-        } else {
-          setError(res.message || 'Verification failed.');
-        }
-      })
-      .catch(err => {
-        setError('An unexpected error occurred.');
+    try {
+      const { res, status } = await services.panVerification({
+        pan: panNumber,
+        adharID: adharNum,
       });
+      if (status === 200) {
+        setFullName(res.fullName);
+        setRefNum(res.id);
+        setAdharNum(res.adharID);
+        setRegistered(true);
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('adharID');
+        }
+      } else {
+        setError(res.message || 'Verification failed.');
+      }
+    } catch (err) {
+      setError('An unexpected error occurred.');
+    }
   };
 
   return (
