@@ -63,7 +63,7 @@ function Otp({backotp, adharID} : {backotp : String, adharID : String}) {
             {[0, 1, 2, 3, 4, 5].map((i) => (
               <input
                 key={i}
-                ref={(el) => (inputRefs.current[i] = el)}
+                ref={(el) => { inputRefs.current[i] = el }}
                 type="text"
                 maxLength={1}
                 value={otp[i] || ''}
